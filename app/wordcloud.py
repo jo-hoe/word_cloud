@@ -18,6 +18,7 @@ def generate_wordcloud(
     background_color: str = "white",
     shape_path: Optional[str] = None,
     font_path: Optional[str] = None,
+    palette: Optional[str] = None,
 ):
     # Limit the number of words to max_word_number
     limited_word_count = dict(
@@ -41,10 +42,54 @@ def generate_wordcloud(
             except Exception as e:
                 print(f"Failed to load shape mask from {shape_path}: {e}")
 
+    # Determine color function based on palette input
+    color_func = None
+    if palette:
+        def _resolve_colors(pal: str):
+            presets = {
+                "base": ["#BB0404", "#FF8800", "#A510A5","#800000", "#008000", "#090961", "#3C0085"],
+                "pastel": ["#AEC6CF", "#FFD1DC", "#FFB347", "#B39EB5", "#77DD77", "#CFCFC4", "#F49AC2", "#CB99C9", "#FDFD96", "#CDEAC0"],
+                "vibrant": ["#E6194B", "#3CB44B", "#FFE119", "#0082C8", "#F58231", "#911EB4", "#46F0F0", "#F032E6", "#FABEBE", "#008080"],
+                "cool": ["#0E6CFF", "#3A86FF", "#48BFE3", "#56CFE1", "#72EFDD", "#80FFDB", "#64DFDF", "#4EA8DE"],
+                "warm": ["#FF595E", "#FF924C", "#FFCA3A", "#FB5607", "#FF7B00", "#FF006E", "#E85D04", "#DC2F02"],
+                "earth": ["#7F5539", "#9C6644", "#B08968", "#DDB892", "#EDE0D4", "#CCD5AE", "#A3B18A", "#588157"],
+            }
+            p = pal.strip()
+            low = p.lower()
+            if low in presets:
+                return presets[low]
+            if low.startswith("mono-"):
+                color = p.split("-", 1)[1].strip()
+                if not color.startswith("#"):
+                    color = "#" + color
+                return [color] * 10
+            if "," in p:
+                cols = []
+                for c in p.split(","):
+                    c = c.strip()
+                    if not c:
+                        continue
+                    if not c.startswith("#"):
+                        c = "#" + c
+                    cols.append(c)
+                return cols
+            if p.startswith("#"):
+                return [p]
+            return None
+
+        colors = _resolve_colors(palette)
+        if colors:
+            import random as _random
+            def color_func(*args, **kwargs):
+                return _random.choice(colors)
+
+    # Build kwargs to avoid passing None-typed color_func when unset (type-checker friendly)
+    kwargs = dict(width=width, height=height, background_color=background_color, font_path=font_path)
     if mask is not None:
-        wc = WordCloud(width=width, height=height, background_color=background_color, mask=mask, font_path=font_path)
-    else:
-        wc = WordCloud(width=width, height=height, background_color=background_color, font_path=font_path)
+        kwargs["mask"] = mask
+    if color_func is not None:
+        kwargs["color_func"] = color_func
+    wc = WordCloud(**kwargs)
 
     wordcloud = wc.generate_from_frequencies(limited_word_count)
 

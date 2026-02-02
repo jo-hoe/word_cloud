@@ -97,6 +97,16 @@ def main():
         default=None,
         help="Path to a TTF/OTF font file. Use an emoji-capable font to render emojis (e.g., C:\\Windows\\Fonts\\seguiemj.ttf).",
     )
+    parser.add_argument(
+        "--palette",
+        type=str,
+        default=None,
+        help=(
+            "Color palette for words. Presets: 'pastel', 'vibrant', 'cool', 'warm', 'earth'. "
+            "Or provide comma-separated hex colors (e.g., '#ff0000,#00ff00,#0000ff') "
+            "or 'mono-#RRGGBB' for a single color (e.g., 'mono-#333333')."
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -141,6 +151,7 @@ def main():
         background_color=args.background_color,
         shape_path=args.shape_path,
         font_path=args.font_path,
+        palette=args.palette,
     )
     print(f"Word cloud will be saved to: {output_path}")
 

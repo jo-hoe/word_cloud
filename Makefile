@@ -28,11 +28,3 @@ save-dependencies: ## save current dependencies
 .PHONY: test
 test: ## run all tests
 	${SCRIPT_DIR}python -m unittest discover -s $(ROOT_DIR)test/ --verbose
-
-.PHONY: start
-start:
-	${SCRIPT_DIR}python ${ROOT_DIR}main.py
-
-.PHONY: docker-build
-docker-build: ## build docker image
-	docker build -t word_cloud ${ROOT_DIR}

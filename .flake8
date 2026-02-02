@@ -1,0 +1,14 @@
+[flake8]
+max-line-length = 100
+extend-ignore =
+    E203  # Whitespace before ':', compatible with Black if used
+    W503  # Line break before binary operator
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    build,
+    dist
+per-file-ignores =
+    # Allow module-level imports that may be unused in __init__.py
+    app/strategies/__init__.py: F401

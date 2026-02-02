@@ -32,7 +32,6 @@ class WhatsAppStrategy(InputSourceStrategy):
     REGEX_PATTERN_MEMBER_NAME = "name"
     WHATSAPP_DATE_PATTERN = "%x, %H:%M"
 
-
     @staticmethod
     def get_absolute_path(path: str) -> str:
         script_dir = os.path.dirname(__file__)
@@ -50,7 +49,8 @@ class WhatsAppStrategy(InputSourceStrategy):
         if not os.path.isabs(path):
             script_dir = os.path.dirname(__file__)
             candidates.append(os.path.join(script_dir, path))
-            project_root = os.path.abspath(os.path.join(script_dir, "..", ".."))
+            project_root = os.path.abspath(
+                os.path.join(script_dir, "..", ".."))
             candidates.append(os.path.join(project_root, "test", path))
 
         last_error = None
@@ -84,18 +84,28 @@ class WhatsAppStrategy(InputSourceStrategy):
             string_representation, WhatsAppStrategy.WHATSAPP_DATE_PATTERN
         )
 
+    def extract_texts_from_string(self, text: str) -> str:
+        """
+        Convenience method used for tests and simple inputs:
+        Returns the provided text with WhatsApp-specific placeholders removed.
+        """
+        if text is None:
+            return text
+        return text.replace("<Media omitted>", "").replace("<Media omitted>", "")
+
     def extract_texts(self, input_source: str) -> List[str]:
         """
         Extract message texts from a WhatsApp exported chat backup file.
         Returns a list of message strings.
         """
-        # Load backup text
         backup_text = self.get_file_content(input_source)
+        return self._parse_messages_from_string(backup_text)
 
+    def _parse_messages_from_string(self, input_string: str) -> List[str]:
         # Compile and parse messages using embedded regex
         pattern = re.compile(self.REGEX_PATTERN, flags=re.MULTILINE | re.VERBOSE)
         texts: List[str] = []
-        for match in pattern.finditer(backup_text):
+        for match in pattern.finditer(input_string):
             message = match.groupdict().get(self.REGEX_PATTERN_MEMBER_MESSAGE)
             if message is not None:
                 texts.append(message.replace("<Media omitted>", ""))

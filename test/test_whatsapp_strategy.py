@@ -21,6 +21,25 @@ class TestWhatsAppStrategy(unittest.TestCase):
         text = WhatsAppStrategy.remove_urls(text_with_url)
         self.assertTrue("http" not in text)
 
+    def test_emoji_in_text(self):
+        text_with_emoji = "Hello 🥯 world!"
+        strategy = WhatsAppStrategy()
+        text = strategy.extract_texts_from_string(text_with_emoji)
+        self.assertIn("🥯", text)
+
+    def test_emoji_does_not_count_against_character_limit(self):
+        text_with_emoji = "Hi 🥯"
+        strategy = WhatsAppStrategy()
+        texts = [text_with_emoji]
+        counts = word_counts_from_texts(
+            texts=texts,
+            min_word_length=2,
+            blocklist_words=set(),
+            blocklist_regex=[],
+        )
+        self.assertIn("hi", counts)
+        self.assertIn("🥯", counts)
+
     def test_extract_texts_removes_media_placeholder(self):
         strategy = WhatsAppStrategy()
         texts = strategy.extract_texts(TEST_BACKUP_FILE_TXT)
@@ -28,14 +47,22 @@ class TestWhatsAppStrategy(unittest.TestCase):
             self.assertNotIn("<Media omitted>", t)
 
     def test_word_counts_from_texts(self):
-        texts = ["🥯", "hello", "Hello World", "HelloWorld"]
+        texts = ["hi", "hello", "Hello World", "HelloWorld"]
         counts = word_counts_from_texts(
             texts=texts,
-            min_word_length=3,
+            min_word_length=4,
             blocklist_words=set(),
             blocklist_regex=[],
         )
-        self.assertEqual(len(counts), 3)
+
+        expected_counts = {
+            "hello": 2,
+            "world": 1,
+            "helloworld": 1,
+        }
+
+        self.assertEqual(counts, expected_counts,
+                         f"Expected {expected_counts}, got {counts}")
 
     def test_top_word_from_backup(self):
         strategy = WhatsAppStrategy()
@@ -46,7 +73,8 @@ class TestWhatsAppStrategy(unittest.TestCase):
             blocklist_words=set(),
             blocklist_regex=[],
         )
-        top_word = sorted(counts.items(), key=lambda x: x[1], reverse=True)[0][0]
+        top_word = sorted(
+            counts.items(), key=lambda x: x[1], reverse=True)[0][0]
         self.assertEqual("often", top_word)
 
 

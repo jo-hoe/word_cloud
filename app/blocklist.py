@@ -1,6 +1,7 @@
 import os
 import re
 from typing import List, Set, Optional
+from app.analyzer import tokenize as analyzer_tokenize
 
 
 def _read_file_text(path: str) -> str:
@@ -9,13 +10,20 @@ def _read_file_text(path: str) -> str:
 
 
 def _tokenize(words: str) -> List[str]:
-    return re.sub(r"[^\w]", " ", words).split()
+    """
+    Tokenize using the analyzer's tokenizer so emojis are preserved.
+    """
+    try:
+        return analyzer_tokenize(words)
+    except Exception:
+        # Fallback to basic word-only tokenization
+        return re.sub(r"[^\w]", " ", words).split()
 
 
 def load_blocklist_words(path: Optional[str]) -> Set[str]:
     """
     Load a plain word blocklist file, returning a set of lowercase tokens.
-    Lines are tokenized on non-word characters.
+    Tokenizes using the analyzer's tokenizer so emojis are supported.
     """
     if not path:
         return set()

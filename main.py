@@ -6,6 +6,36 @@ from app.analyzer import word_counts_from_texts
 from app.wordcloud import generate_wordcloud
 
 
+def detect_default_emoji_font():
+    import platform
+    import os
+    try:
+        system = platform.system().lower()
+    except Exception:
+        system = ""
+    candidates = []
+    if "windows" in system:
+        # Windows default: Segoe UI Emoji
+        candidates.append(r"C:\Windows\Fonts\seguiemj.ttf")
+    else:
+        # Ubuntu/Linux: try Symbola bundled with wordcloud (if present), then common system paths
+        try:
+            import wordcloud as wc
+            d = os.path.dirname(wc.__file__)
+            candidates.append(os.path.join(d, "fonts", "Symbola", "Symbola.ttf"))
+        except Exception:
+            pass
+        candidates.extend([
+            "/usr/share/fonts/truetype/ttf-symbola/Symbola.ttf",
+            "/usr/share/fonts/truetype/ancient-scripts/Symbola.ttf",
+            "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf",
+        ])
+    for p in candidates:
+        if p and os.path.exists(p):
+            return p
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Analyze input sources and generate word clouds."
@@ -61,8 +91,21 @@ def main():
         type=str,
         help="Optional path to an image file used as a mask/shape for the word cloud.",
     )
+    parser.add_argument(
+        "--font_path",
+        type=str,
+        default=None,
+        help="Path to a TTF/OTF font file. Use an emoji-capable font to render emojis (e.g., C:\\Windows\\Fonts\\seguiemj.ttf).",
+    )
 
     args = parser.parse_args()
+
+    # Auto-select default emoji-capable font if none provided
+    if not args.font_path:
+        auto_font = detect_default_emoji_font()
+        if auto_font:
+            args.font_path = auto_font
+            print(f"Using default emoji font: {args.font_path}")
 
     input_source = args.input_source
     input_type = args.input_type
@@ -97,6 +140,7 @@ def main():
         height=args.height,
         background_color=args.background_color,
         shape_path=args.shape_path,
+        font_path=args.font_path,
     )
     print(f"Word cloud will be saved to: {output_path}")
 

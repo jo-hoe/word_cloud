@@ -17,6 +17,7 @@ def generate_wordcloud(
     height: int = 400,
     background_color: str = "white",
     shape_path: Optional[str] = None,
+    font_path: Optional[str] = None,
 ):
     # Limit the number of words to max_word_number
     limited_word_count = dict(
@@ -41,9 +42,9 @@ def generate_wordcloud(
                 print(f"Failed to load shape mask from {shape_path}: {e}")
 
     if mask is not None:
-        wc = WordCloud(width=width, height=height, background_color=background_color, mask=mask)
+        wc = WordCloud(width=width, height=height, background_color=background_color, mask=mask, font_path=font_path)
     else:
-        wc = WordCloud(width=width, height=height, background_color=background_color)
+        wc = WordCloud(width=width, height=height, background_color=background_color, font_path=font_path)
 
     wordcloud = wc.generate_from_frequencies(limited_word_count)
 

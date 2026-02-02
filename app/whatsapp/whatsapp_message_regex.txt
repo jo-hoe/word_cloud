@@ -1,0 +1,7 @@
+(?# contains the regex statement to parse whatsapp messages)
+(?# make sure re lib is configure with re.VERBOSE and re.MULTILINE)
+^
+(?P<datetime>\d{1,2}\/\d{1,2}\/\d{2}[^-]+)\s+-\s+
+(?P<name>[^:]+):\s+
+(?P<message>[\s\S]+?)
+(?=^\d{1,2}\/\d{1,2}\/\d{2}[^-]|\Z)

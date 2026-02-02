@@ -3,6 +3,7 @@ import re
 import datetime
 from typing import List
 from app.strategies.base import InputSourceStrategy
+from app.utils.file_utils import get_file_content as util_get_file_content, get_absolute_path as util_get_absolute_path
 
 
 class WhatsAppMessage:
@@ -35,37 +36,15 @@ class WhatsAppStrategy(InputSourceStrategy):
     @staticmethod
     def get_absolute_path(path: str) -> str:
         script_dir = os.path.dirname(__file__)
-        return os.path.join(script_dir, path)
+        return util_get_absolute_path(script_dir, path)
 
     @staticmethod
     def get_file_content(path: str) -> str:
         """
-        Read text content from a file. Tries multiple locations for relative paths:
-        - As provided (current working directory)
-        - Relative to this module's directory
-        - Under project_root/test/
+        Read text content from a file using shared file_utils, preserving original resolution behavior.
         """
-        candidates = [path]
-        if not os.path.isabs(path):
-            script_dir = os.path.dirname(__file__)
-            candidates.append(os.path.join(script_dir, path))
-            project_root = os.path.abspath(
-                os.path.join(script_dir, "..", ".."))
-            candidates.append(os.path.join(project_root, "test", path))
-
-        last_error = None
-        for p in candidates:
-            try:
-                with open(p, "r", encoding="utf8", errors="ignore") as file:
-                    return file.read()
-            except FileNotFoundError as e:
-                last_error = e
-                continue
-
-        # If all attempts failed, raise the last error
-        if last_error:
-            raise last_error
-        raise FileNotFoundError(f"File not found: {path}")
+        script_dir = os.path.dirname(__file__)
+        return util_get_file_content(path, base_dir=script_dir)
 
     @staticmethod
     def remove_urls(text: str) -> str:

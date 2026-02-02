@@ -10,8 +10,10 @@ def main():
     parser = argparse.ArgumentParser(
         description="Analyze input sources and generate word clouds."
     )
-    parser.add_argument("input_source", type=str, help="Path to the source file.")
-    parser.add_argument("input_type", type=str, help="Type of input source (e.g., 'whatsapp').")
+    parser.add_argument("input_source", type=str,
+                        help="Path to the source file.")
+    parser.add_argument("--input_type", type=str, default="whatsapp",
+                        help="Type of input source (e.g., 'whatsapp').")
     parser.add_argument(
         "--blocklist_word_file", required=False, type=str, help="Path to the word blocklist file."
     )
@@ -73,9 +75,6 @@ def main():
 
     # Resolve strategy for the given input type
     strategy = get_strategy(input_type)
-
-    print(f"Processing input source: {input_source}")
-    print(f"Input type: {input_type}")
 
     # Extract texts via strategy
     texts = strategy.extract_texts(input_source)

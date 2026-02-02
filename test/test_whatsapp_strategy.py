@@ -1,9 +1,10 @@
 import unittest
+import os
 
 from app.strategies.whatsapp_strategy import WhatsAppStrategy
 from app.analyzer import word_counts_from_texts
 
-TEST_BACKUP_FILE_TXT = "test_backup_file.txt"
+TEST_BACKUP_FILE_TXT = os.path.join(os.path.dirname(__file__), "test_backup_file.txt")
 
 
 class TestWhatsAppStrategy(unittest.TestCase):

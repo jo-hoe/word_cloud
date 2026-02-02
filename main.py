@@ -63,18 +63,6 @@ def main():
         help="Maximum number of words to be in the output.",
     )
     parser.add_argument(
-        "--width",
-        type=int,
-        default=800,
-        help="Width of the generated word cloud image.",
-    )
-    parser.add_argument(
-        "--height",
-        type=int,
-        default=400,
-        help="Height of the generated word cloud image.",
-    )
-    parser.add_argument(
         "--background_color",
         type=str,
         default="white",
@@ -115,7 +103,6 @@ def main():
         auto_font = detect_default_emoji_font()
         if auto_font:
             args.font_path = auto_font
-            print(f"Using default emoji font: {args.font_path}")
 
     input_source = args.input_source
     input_type = args.input_type
@@ -146,8 +133,6 @@ def main():
         counts,
         output_path,
         args.max_word_number,
-        width=args.width,
-        height=args.height,
         background_color=args.background_color,
         shape_path=args.shape_path,
         font_path=args.font_path,

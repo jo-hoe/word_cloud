@@ -11,20 +11,42 @@ def main():
         description="Analyze input sources and generate word clouds."
     )
     parser.add_argument("input_source", type=str, help="Path to the source file.")
+    parser.add_argument("input_type", type=str, help="Type of input source (e.g., 'whatsapp').")
     parser.add_argument(
-        "input_type", type=str, help="Type of input source (e.g., 'whatsapp')."
+        "--blocklist_word_file", required=False, type=str, help="Path to the word blocklist file."
     )
     parser.add_argument(
-        "--blocklist_word_file", type=str, help="Path to the word blocklist file."
-    )
-    parser.add_argument(
-        "--blocklist_regex_file", type=str, help="Path to the regex blocklist file."
+        "--blocklist_regex_file", required=False, type=str, help="Path to the regex blocklist file."
     )
     parser.add_argument(
         "--output",
         type=str,
-        default="output",
-        help="Directory to save the generated word clouds.",
+        default="output/output.png",
+        help="Path to save the generated word cloud PNG (directory will be created if needed).",
+    )
+    parser.add_argument(
+        "--max_word_number",
+        type=int,
+        default=124,
+        help="Maximum number of words to be in the output.",
+    )
+    parser.add_argument(
+        "--width",
+        type=int,
+        default=800,
+        help="Width of the generated word cloud image.",
+    )
+    parser.add_argument(
+        "--height",
+        type=int,
+        default=400,
+        help="Height of the generated word cloud image.",
+    )
+    parser.add_argument(
+        "--background_color",
+        type=str,
+        default="white",
+        help="Background color of the generated word cloud image.",
     )
     parser.add_argument(
         "--min_word_length",
@@ -33,20 +55,21 @@ def main():
         help="Minimum length of words to consider.",
     )
     parser.add_argument(
-        "--max_word_number",
-        type=int,
-        default=45,
-        help="Maximum number of words to be in the output.",
+        "--shape_path",
+        type=str,
+        help="Optional path to an image file used as a mask/shape for the word cloud.",
     )
 
     args = parser.parse_args()
 
     input_source = args.input_source
     input_type = args.input_type
-    output_dir = args.output
+    output_path = args.output
 
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir, exist_ok=True)
+    # Ensure output directory exists (also handled in generate_wordcloud, but done here per requirement)
+    out_dir = os.path.dirname(output_path) or "."
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir, exist_ok=True)
 
     # Resolve strategy for the given input type
     strategy = get_strategy(input_type)
@@ -67,8 +90,16 @@ def main():
     )
 
     # Generate and save word cloud
-    generate_wordcloud(counts, output_dir, args.max_word_number)
-    print(f"Word clouds will be saved to: {output_dir}")
+    generate_wordcloud(
+        counts,
+        output_path,
+        args.max_word_number,
+        width=args.width,
+        height=args.height,
+        background_color=args.background_color,
+        shape_path=args.shape_path,
+    )
+    print(f"Word cloud will be saved to: {output_path}")
 
 
 if __name__ == "__main__":

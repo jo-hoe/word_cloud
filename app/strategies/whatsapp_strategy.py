@@ -87,5 +87,7 @@ class WhatsAppStrategy(InputSourceStrategy):
         for match in pattern.finditer(input_string):
             message = match.groupdict().get(self.REGEX_PATTERN_MEMBER_MESSAGE)
             if message is not None:
-                texts.append(message.replace("<Media omitted>", ""))
+                # filter out the common placeholders for media and edited messages, 
+                # as they don't add value to the word cloud
+                texts.append(message.replace("<Media omitted>", "").replace("<This message was edited>", ""))
         return texts
